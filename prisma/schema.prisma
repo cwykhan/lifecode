@@ -7,13 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 1. 사용자 모델: 글로벌 SaaS의 핵심인 결제 상태와 프로필을 연결합니다.
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  isPremium     Boolean   @default(false)
+  
+  // 글로벌 결제 대응 (Stripe/Paddle 선택적 사용 가능)
+  stripeCustomerId String? @unique
+  paddleUserId     String? @unique 
+  
+  // 사용자가 생성한 사주 분석 프로필들
+  sajuProfiles  SajuProfile[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// 2. 사주 분석 프로필: 화이트보드 기반 K-update 데이터를 저장합니다.
+model SajuProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 입력 정보
+  name        String?
+  birthDate   DateTime
+  gender      String?  // Male, Female
+  isSolar     Boolean  @default(true) // 양력/음력 구분
+  
+  // [K-update 8칸 격자 데이터]
+  // JSON 구조 예시: { 
+  //   "year": {"sky": "F", "land": "e"}, 
+  //   "month": {"sky": "m", "land": "M"}, 
+  //   "day": {"sky": "f", "land": "M"}, 
+  //   "time": {"sky": "m", "land": "W"} 
+  // }
+  pillars     Json     
+  
+  // [전문 분석 결과]
+  strength     String   // EXTREMELY_STRONG, STRONG, BALANCED, WEAK, EXTREMELY_WEAK
+  score        Int      // 0 ~ 100 점수
+  usefulEnergy String[] // 용신 기호 (예: ["M", "W"])
+  
+  createdAt   DateTime @default(now())
+}
+
+// 3. 결제 내역 모델: 기존 Payment 모델을 확장하여 범용성을 높였습니다.
 model Payment {
-  id              String   @id @default(cuid())
-  stripeSessionId String   @unique
-  stripePaymentId String
-  email           String
-  amount          Int
-  currency        String
-  status          String
-  createdAt       DateTime @default(now())
+  id                String   @id @default(cuid())
+  email             String
+  amount            Int
+  currency          String
+  status            String   // SUCCEEDED, PENDING, FAILED
+  
+  // 결제 수단별 세션/영수증 ID
+  provider          String   @default("stripe") // "stripe" 또는 "paddle"
+  externalSessionId String   @unique            // stripeSessionId 또는 paddleOrderId
+  externalPaymentId String?                     // stripePaymentId 등
+  
+  createdAt         DateTime @default(now())
 }
