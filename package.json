@@ -1,0 +1,31 @@
+{
+  "name": "lifecode",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@paddle/paddle-node-sdk": "^1.x.x",
+    "@prisma/client": "^5.x.x",
+    "autoprefixer": "^10.4.27",
+    "framer-motion": "^12.35.1",
+    "lucide-react": "^0.x.x",
+    "next": "^16.1.6",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "postcss": "^8.5.8",
+    "prisma": "^5.x.x",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5"
+  }
+}

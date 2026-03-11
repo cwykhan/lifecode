@@ -1,0 +1,30 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  nickname      String?   // 의기천추 등
+  plan          String    @default("SLAVE") // SLAVE, NOBLE, KING 등
+  paddleId      String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sajuEntries   SajuData[]
+}
+
+model SajuData {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  birthDate   DateTime
+  resultJson  Json     // LifecodeEngine.analyze() 의 리턴값 저장
+  createdAt   DateTime @default(now())
+}
