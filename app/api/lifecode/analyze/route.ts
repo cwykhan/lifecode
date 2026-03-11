@@ -1,46 +1,37 @@
-// app/api/lifecode/analyze/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { LifecodeEngine } from '@/lib/lifecode/engine';
+import { getSajuAnalysis } from '@/lib/lifecode/engine'; // 경로 오류 수정 완료
+import { PlanTier } from '@/lib/plans';
 
 export async function POST(req: Request) {
   try {
-    const { name, birthDate, email, gender } = await req.json();
-    const date = new Date(birthDate);
+    const body = await req.json();
+    const { birthData, email } = body;
 
-    // K-upfate lifecode 엔진 실행
-    const analysis = LifecodeEngine.analyze(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes()
+    // 1. 이메일 정보가 있다면 DB에서 해당 유저의 플랜(Plan) 조회
+    let userTier: PlanTier = 'free';
+    if (email) {
+      const user = await prisma.user.findUnique({
+        where: { email: email },
+        select: { plan: true }
+      });
+      
+      // DB에 저장된 paddle price_id를 PlanTier 형식으로 변환하거나 매칭
+      // (기본값은 free이며, 실제 로직에 맞춰 확장 가능)
+      if (user?.plan) {
+        userTier = user.plan as PlanTier;
+      }
+    }
+
+    // 2. 사주 엔진 호출 (등급에 따른 결과 생성)
+    const result = getSajuAnalysis(birthData, userTier);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('[Saju Analyze Error]:', error);
+    return NextResponse.json(
+      { error: '사주 분석 중 오류가 발생했습니다.' },
+      { status: 500 }
     );
-
-    // DB 저장 로직
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.upsert({
-        where: { email },
-        update: {},
-        create: { email }
-      });
-
-      return await tx.sajuProfile.create({
-        data: {
-          userId: user.id,
-          name,
-          birthDate: date,
-          gender,
-          pillars: analysis.pillars,
-          strength: analysis.strength,
-          score: analysis.score,
-          usefulEnergy: analysis.usefulEnergy
-        }
-      });
-    });
-
-    return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
