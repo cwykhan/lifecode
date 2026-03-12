@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSajuAnalysis } from '@/lib/engine'; // 경로를 @/lib/engine으로 통일
+import { getSajuAnalysis } from '@/lib/engine'; // 정확한 이름으로 import
 import { PlanTier } from '@/lib/plans';
 
 export async function POST(req: Request) {
@@ -8,7 +8,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { birthData, email } = body;
 
-    // 1. 유저 플랜 조회 (기본값 free)
     let userTier: PlanTier = 'free';
     
     if (email) {
@@ -22,7 +21,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. 사주 엔진 호출
+    // 엔진 호출
     const result = getSajuAnalysis(birthData, userTier);
 
     return NextResponse.json(result);

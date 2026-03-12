@@ -1,98 +1,57 @@
-import { Solar } from 'lunar-typescript';
+import { PLANS, PlanTier } from '@/lib/plans';
 
-/**
- * K-upfate 전용 기호 시스템 (LifeCode Standard)
- * 대문자: Positive (Yang), 소문자: Negative (Eum)
- */
-export const K_SYMBOLS: Record<string, string> = {
-  '甲': 'T', '乙': 't', '丙': 'F', '丁': 'f', '戊': 'E', '己': 'e', '庚': 'M', '辛': 'm', '壬': 'W', '癸': 'w'
-};
-
-/**
- * 지지(Land) 보정 데이터 (명리학적 특수성 반영)
- */
-const LAND_CORRECTION: Record<string, { type: string; description: string }> = {
-  '酉': { type: 'M/m', description: 'Pure Metal Essence (Gyeong/Sin)' }, // 유(酉) 보정
-  '丑': { type: 'e', description: 'Negative Earth (Chuk)' }              // 축(丑) 보정
-};
-
-export class LifecodeEngine {
-  /**
-   * 사주 분석 실행 메인 메소드
-   */
-  public static analyze(year: number, month: number, day: number, hour: number, minute: number) {
-    const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
-    const lunar = solar.getLunar();
-    const eightChar = lunar.getEightChar();
-
-    // 1. 8칸 격자(Pillars) 데이터 추출 (글로벌 표준: Hour -> Day -> Month -> Year)
-    const rawPillars = [
-      { id: 'time',  sky: eightChar.getTimeGan(),  land: eightChar.getTimeZhi(),  label: 'Hour' },
-      { id: 'day',   sky: eightChar.getDayGan(),   land: eightChar.getDayZhi(),   label: 'Day' },
-      { id: 'month', sky: eightChar.getMonthGan(), land: eightChar.getMonthZhi(), label: 'Month' },
-      { id: 'year',  sky: eightChar.getYearGan(),  land: eightChar.getYearZhi(),  label: 'Year' }
-    ];
-
-    const pillars = rawPillars.map(p => ({
-      ...p,
-      skySymbol: K_SYMBOLS[p.sky],
-      correction: LAND_CORRECTION[p.land] || null,
-      isPositive: this.checkIsPositive(p.sky) // Sky-Gan 기준 Positive/Negative 판별
-    }));
-
-    // 2. 강약(Strength) 분석 및 점수화
-    const score = this.calculateStrength(eightChar);
-    const strength = this.getStrengthLabel(score);
-
-    // 3. 조후 및 특수 조합(삼합 등) 체크
-    const combo = this.checkSpecialCombos(eightChar);
-
-    // 4. 분석 결과에 따른 최적 에너지(Useful Energy) 추출
-    // 강한 사주는 억제(Metal/Water), 약한 사주는 보강(Fire/Earth/Tree)
-    const usefulEnergy = (score > 52) ? ["M", "W"] : ["F", "E", "T"];
-
-    return {
-      metadata: {
-        version: "1.0.0-final",
-        engine: "K-upfate",
-        timezone: "Global/UTC"
-      },
-      pillars, // Hour-Day-Month-Year 순서
-      analysis: {
-        strength,
-        score,
-        usefulEnergy,
-        overallPolarity: score > 50 ? "Positive Dominant" : "Negative Dominant"
-      },
-      specialNotes: combo
-    };
-  }
-
-  private static checkIsPositive(gan: string): boolean {
-    const positiveGans = ['甲', '丙', '戊', '庚', '壬'];
-    return positiveGans.includes(gan);
-  }
-
-  private static checkSpecialCombos(eightChar: any) {
-    const lands = [eightChar.getYearZhi(), eightChar.getMonthZhi(), eightChar.getDayZhi(), eightChar.getTimeZhi()];
-    const hasSamHapWater = lands.includes('申') && lands.includes('子') && lands.includes('辰');
-    
-    return {
-      hasSamHapWater,
-      name: hasSamHapWater ? "Triple Water Connection (申子辰)" : null
-    };
-  }
-
-  private static calculateStrength(eightChar: any): number {
-    // 득령, 득지, 득세 가중치 계산 (현재 프로젝트 기준값 60)
-    return 60; 
-  }
-
-  private static getStrengthLabel(score: number): string {
-    if (score > 80) return 'EXTREMELY_STRONG';
-    if (score > 55) return 'STRONG';
-    if (score > 45) return 'BALANCED';
-    if (score > 20) return 'WEAK';
-    return 'EXTREMELY_WEAK';
-  }
+export interface SajuResult {
+  title: string;
+  basicInfo: string;
+  analysis: string[];
+  advice: string;
+  rankName: string;
 }
+
+// 반드시 'export const getSajuAnalysis'로 시작해야 합니다.
+export const getSajuAnalysis = (
+  birthData: { year: number; month: number; day: number; hour?: number },
+  tier: PlanTier = 'free'
+): SajuResult => {
+  const plan = PLANS[tier] || PLANS.free;
+  const { year, month, day } = birthData;
+
+  const baseAnalysis = [
+    "태어난 날의 기운이 강하여 자수성가할 운명입니다.",
+    "초년운은 다소 기복이 있으나 중년 이후 안정을 찾습니다.",
+    "목(木)의 기운이 부족하니 푸른 계열의 옷이 길합니다.",
+    "올해는 문서운이 좋으니 새로운 계약이나 공부에 적합합니다.",
+    "인간관계에서 구설수를 조심해야 하는 시기입니다.",
+    "재물운은 북쪽에서 들어오니 이사나 이동 시 참고하세요.",
+    "건강면에서는 소화기 계통을 주의 깊게 살펴야 합니다.",
+    "창의적인 업무에서 두각을 나타낼 잠재력이 큽니다.",
+    "주변의 조력자를 만나 큰 위기를 넘기게 될 상입니다.",
+    "하반기에는 예상치 못한 횡재수가 기다리고 있습니다.",
+    "결단력이 필요한 시점에 타인의 의견에 휘둘리지 마세요.",
+    "장기적인 투자가 결실을 맺는 해가 될 것입니다.",
+    "예술적 감각이 뛰어나 취미 활동이 직업으로 이어질 수 있습니다.",
+    "가정 내 화목이 곧 성공의 밑거름이 되는 사주입니다.",
+    "명예운이 상승하는 시기이니 대외 활동을 늘리세요.",
+    "스스로를 믿고 나아갈 때 하늘이 돕는 형국입니다."
+  ];
+
+  const slicedAnalysis = baseAnalysis.slice(0, plan.lines);
+
+  const getAdviceByTier = (tier: PlanTier): string => {
+    switch (tier) {
+      case 'p50': return "천하를 호령할 황제의 기운입니다.";
+      case 'p25': return "귀족의 품격을 타고나셨군요.";
+      case 'p5':  return "상인의 영민함이 돋보입니다.";
+      case 'p1':  return "성실함이 최고의 무기입니다.";
+      default:    return "현재 무료 등급입니다. 더 깊은 분석은 업그레이드가 필요합니다.";
+    }
+  };
+
+  return {
+    title: `${year}년 ${month}월 ${day}일 운세`,
+    rankName: plan.label,
+    basicInfo: `현재 등급: ${plan.label}`,
+    analysis: slicedAnalysis,
+    advice: getAdviceByTier(tier)
+  };
+};
