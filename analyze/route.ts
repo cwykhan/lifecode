@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSajuAnalysis } from '@/lib/engine'; // 정확한 이름으로 import
+import { getSajuAnalysis } from '@/lib/engine'; // 📌 경로와 이름을 일치시켰습니다.
 import { PlanTier } from '@/lib/plans';
 
 export async function POST(req: Request) {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 엔진 호출
+    // 📌 엔진 호출 (getSajuAnalysis)
     const result = getSajuAnalysis(birthData, userTier);
 
     return NextResponse.json(result);
