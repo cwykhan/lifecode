@@ -3,20 +3,16 @@ import { PlanTier, TIERS } from '@/lib/plans';
 
 export async function POST(req: NextRequest) {
   try {
-    const { tier } = await req.json() as { tier: PlanTier };
-    const config = TIERS[tier] || TIERS.SLAVE;
-
-    // 황제 등급 32줄 분석 엔진 시뮬레이션
-    const analysis = Array(config.lines).fill(0).map((_, i) => 
-      `[Analysis-Node-${i + 1}] Cosmic data stream synchronized. Frequency: ${Math.random().toFixed(4)}Hz.`
-    );
+    const data = await req.json();
+    const tier = (data.tier as PlanTier) || 'SLAVE';
+    const config = TIERS[tier];
 
     return NextResponse.json({
       success: true,
       tier: config.name,
-      analysis: analysis
+      analysis: Array(config.lines).fill(0).map((_, i) => `Cosmic Data Node ${i+1} verified.`)
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (e: any) {
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }
 }

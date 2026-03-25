@@ -1,4 +1,3 @@
-// lib/plans.ts
 export type PlanTier = 'SLAVE' | 'COMMONER' | 'MERCHANT' | 'NOBLE' | 'EMPEROR';
 
 export interface PlanConfig {
@@ -13,4 +12,4 @@ export const TIERS: Record<PlanTier, PlanConfig> = {
   MERCHANT: { name: "상인", price: 15, lines: 8 },
   NOBLE: { name: "귀족", price: 30, lines: 16 },
   EMPEROR: { name: "왕·황제", price: 50, lines: 32 },
-}
+};
