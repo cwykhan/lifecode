@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { Paddle, Environment } from '@paddle/paddle-node-sdk';
 
 const paddle = new Paddle(process.env.PADDLE_API_KEY || '', {
-  environment: Environment.Sandbox, // 실배포 시 Production으로 변경
+ f environment: Environment.sandbox, // 실배포 시 Production으로 변경
 });
 
 export async function POST(req: Request) {
