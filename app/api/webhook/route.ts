@@ -13,8 +13,7 @@ export async function POST(req: Request) {
 
     if (event) {
       const eventType = (event as any).eventType || (event as any).event_type;
-      console.log(`[LifeCode] Webhook Received: ${eventType}`);
-      return new Response('OK', { status: 200 });
+      return new Response(`Event ${eventType} processed`, { status: 200 });
     }
     return new Response('Invalid signature', { status: 401 });
   } catch (error: any) {

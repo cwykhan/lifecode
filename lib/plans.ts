@@ -1,4 +1,4 @@
-export type PlanTier = 'SLAVE' | 'COMMONER' | 'MERCHANT' | 'NOBLE' | 'EMPEROR';
+export type PlanTier = 'free' | 'SLAVE' | 'COMMONER' | 'MERCHANT' | 'NOBLE' | 'EMPEROR';
 
 export interface PlanConfig {
   name: string;
@@ -6,7 +6,9 @@ export interface PlanConfig {
   lines: number;
 }
 
-export const TIERS: Record<PlanTier, PlanConfig> = {
+// 명칭을 PLANS로 통일하여 임포트 에러 해결
+export const PLANS: Record<PlanTier, PlanConfig> = {
+  free: { name: "무료", price: 0, lines: 1 },
   SLAVE: { name: "노예", price: 0, lines: 2 },
   COMMONER: { name: "평민", price: 5, lines: 4 },
   MERCHANT: { name: "상인", price: 15, lines: 8 },
