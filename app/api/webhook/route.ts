@@ -1,9 +1,9 @@
 import { Paddle, Environment } from '@paddle/paddle-node-sdk';
 
-// 1. Paddle 인스턴스 초기화 (소문자 sandbox로 수정 및 오타 제거)
+// 1. Paddle 인스턴스 초기화
 const paddle = new Paddle({
   apiKey: process.env.PADDLE_API_KEY || '',
-  environment: Environment.sandbox, 
+  environment: Environment.sandbox, // 소문자 s 필수
 });
 
 export async function POST(req: Request) {
@@ -11,21 +11,21 @@ export async function POST(req: Request) {
     const signature = req.headers.get('paddle-signature') || '';
     const body = await req.text();
 
-    // 2. 웹훅 이벤트 검증
-    // 최신 SDK에서는 eventType 대신 event_type을 사용하거나, 
-    // 유효성 검사 후 전체 이벤트를 처리하는 방식을 권장합니다.
+    // 2. 웹훅 이벤트 검증 및 역직렬화
     const event = paddle.webhooks.unmarshal(body, process.env.PADDLE_WEBHOOK_SECRET || '', signature);
 
     if (event) {
-      console.log(`Event received: ${event.eventType || (event as any).event_type}`);
+      // 3. 타입 에러 방지를 위한 동적 접근 (eventType vs event_type)
+      const eventType = (event as any).eventType || (event as any).event_type;
+      console.log(`[LifeCode] Webhook Event Received: ${eventType}`);
       
-      // 여기에 비즈니스 로직(예: EMPEROR 등급 활성화)을 추가합니다.
-      return new Response('Webhook processed', { status: 200 });
+      // 비즈니스 로직 처리 구간
+      return new Response('OK', { status: 200 });
     }
 
-    return new Response('Invalid event', { status: 400 });
-  } catch (e: any) {
-    console.error(`Webhook Error: ${e.message}`);
-    return new Response(`Webhook Error: ${e.message}`, { status: 500 });
+    return new Response('Invalid signature', { status: 401 });
+  } catch (error: any) {
+    console.error(`[LifeCode] Webhook Error: ${error.message}`);
+    return new Response(`Error: ${error.message}`, { status: 500 });
   }
 }
