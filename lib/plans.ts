@@ -6,7 +6,6 @@ export interface PlanConfig {
   lines: number;
 }
 
-// 명칭을 PLANS로 통일하여 임포트 에러 해결
 export const PLANS: Record<PlanTier, PlanConfig> = {
   free: { name: "무료", price: 0, lines: 1 },
   SLAVE: { name: "노예", price: 0, lines: 2 },
