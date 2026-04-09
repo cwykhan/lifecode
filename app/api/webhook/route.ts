@@ -13,10 +13,13 @@ export async function POST(req: Request) {
 
     if (event) {
       const eventType = (event as any).eventType || (event as any).event_type;
-      return new Response(`Event ${eventType} processed`, { status: 200 });
+      console.log(`[LifeCode] Webhook Verified: ${eventType}`);
+      
+      // 결제 완료(subscription.created 등) 시 DB 업데이트 로직 추가 가능
+      return new Response('Success', { status: 200 });
     }
-    return new Response('Invalid signature', { status: 401 });
-  } catch (error: any) {
-    return new Response(`Error: ${error.message}`, { status: 500 });
+    return new Response('Forbidden', { status: 403 });
+  } catch (e: any) {
+    return new Response(`Error: ${e.message}`, { status: 500 });
   }
 }

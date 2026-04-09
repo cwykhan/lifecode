@@ -1,30 +1,19 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import PaddleInit from "./components/PaddleInit";
+import './globals.css';
+import Script from 'next/script';
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "LifeCode - AI Saju Analysis",
-  description: "Unlock your destiny with advanced AI Saju analysis",
+export const metadata = {
+  title: 'LifeCode AI | Architecting Destiny',
+  description: 'Enterprise-grade AI Saju Intelligence',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {/* Paddle 결제 시스템 초기화 스크립트 */}
-        <PaddleInit />
-        
-        <main className="min-h-screen bg-slate-900 text-white">
-          {children}
-        </main>
-      </body>
+    <html lang="ko">
+      <head>
+        {/* Paddle 결제 라이브러리 로드 */}
+        <Script src="https://cdn.paddle.com/paddle/paddle.js" strategy="beforeInteractive" />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }

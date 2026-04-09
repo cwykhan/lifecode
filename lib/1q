@@ -1,0 +1,27 @@
+// lib/fateAnalyzer.ts
+import { SajuUnit } from './sajuEngine';
+
+export interface FateReport {
+  structure: string;
+  utilityGod: string;
+  analysis: string;
+  score: { T: number; t: number; F: number; f: number; E: number; e: number; M: number; m: number; W: number; w: number; };
+}
+
+export const analyzeFate = (sajuData: SajuUnit[], rank: string): FateReport => {
+  // 기본 점수 객체
+  const score = { T: 0, t: 0, F: 0, f: 0, E: 0, e: 0, M: 0, m: 0, W: 0, w: 0 };
+  
+  // 랭크별 분석 깊이 설정 (image_569b80.png 기준)
+  let analysis = "Upgrade to EMPEROR gate for master analysis.";
+  if (rank === 'EMPEROR') {
+    analysis = "Your cosmic code suggests a master-level strategic architect life.";
+  }
+
+  return {
+    structure: "Decoding...",
+    utilityGod: "Calculating...",
+    analysis,
+    score
+  };
+};
